@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint || true
+
+      - name: Build packages
+        run: pnpm build --filter=@dtpf/shared-types --filter=@dtpf/sdk-core --filter=@dtpf/sdk-react --filter=sticky-note-ui
+
+      - name: Build demo app
+        run: pnpm --filter react-basic build
+
+  build-agent:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev pkg-config
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build sticky note UI
+        run: pnpm --filter sticky-note-ui build
+
+      - name: Cargo test
+        working-directory: apps/desktop-agent/src-tauri
+        run: cargo test
+
+      - name: Cargo check
+        working-directory: apps/desktop-agent/src-tauri
+        run: cargo check

@@ -1,0 +1,13 @@
+{
+  "name": "desktop-agent",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter sticky-note-ui dev & tauri dev",
+    "build": "pnpm --filter sticky-note-ui build && tauri build",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.1"
+  }
+}

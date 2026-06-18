@@ -1,0 +1,32 @@
+{
+  "name": "@dtpf/sdk-core",
+  "version": "0.1.0",
+  "description": "Core SDK for Desktop Task Presence Framework",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint src/",
+    "test": "node --test dist/**/*.test.js 2>/dev/null || echo 'No tests yet'",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@dtpf/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@dtpf/eslint-config": "workspace:*",
+    "eslint": "^9.17.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}

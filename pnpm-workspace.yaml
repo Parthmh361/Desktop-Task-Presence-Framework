@@ -1,0 +1,5 @@
+packages:
+  - "apps/*"
+  - "apps/desktop-agent/ui/*"
+  - "packages/*"
+  - "examples/*"
