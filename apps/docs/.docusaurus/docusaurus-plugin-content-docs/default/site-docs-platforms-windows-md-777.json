@@ -1,0 +1,26 @@
+{
+  "id": "platforms/windows",
+  "title": "Windows",
+  "description": "Prerequisites for building and running the DTPF desktop agent on Windows.",
+  "source": "@site/docs/platforms/windows.md",
+  "sourceDirName": "platforms",
+  "slug": "/platforms/windows",
+  "permalink": "/platforms/windows",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "Quick Start",
+    "permalink": "/quickstart"
+  },
+  "next": {
+    "title": "Linux",
+    "permalink": "/platforms/linux"
+  }
+}

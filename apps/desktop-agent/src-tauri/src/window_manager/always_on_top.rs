@@ -28,7 +28,7 @@ fn pin_sticky_window_sync(window: &WebviewWindow) {
             unsafe {
                 let _ = SetWindowPos(
                     hwnd,
-                    HWND_TOPMOST,
+                    Some(HWND_TOPMOST),
                     0,
                     0,
                     0,

@@ -3,18 +3,19 @@ set -euo pipefail
 
 echo "Setting up DTPF development environment..."
 
-# Node dependencies
-pnpm install
+# Prefer cross-platform Node setup when available
+if command -v node >/dev/null 2>&1; then
+  node "$(dirname "$0")/setup.mjs"
+  exit 0
+fi
 
-# Build SDK packages
+# Fallback without Node
+pnpm install
 pnpm --filter @dtpf/shared-types build
 pnpm --filter @dtpf/sdk-core build
 pnpm --filter @dtpf/sdk-react build
-
-# Build sticky note UI
 pnpm --filter sticky-note-ui build
 
-# Rust (optional — requires system deps on Linux)
 if command -v cargo >/dev/null 2>&1; then
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo "On Linux, install Tauri deps if not already present:"
@@ -23,4 +24,4 @@ if command -v cargo >/dev/null 2>&1; then
   (cd apps/desktop-agent/src-tauri && cargo check) || echo "Rust check skipped (install system deps)"
 fi
 
-echo "Done. Run 'pnpm --filter react-basic dev' and 'cd apps/desktop-agent && pnpm tauri dev'"
+echo "Done. Run 'pnpm demo:dev' and 'pnpm agent:dev'"

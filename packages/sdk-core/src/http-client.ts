@@ -14,6 +14,21 @@ interface HttpClientOptions {
   timeout: number;
 }
 
+function normalizePlatform(platform?: string): AgentStatus['platform'] {
+  if (platform === 'windows' || platform === 'macos' || platform === 'linux') {
+    return platform;
+  }
+
+  if (typeof navigator !== 'undefined') {
+    const ua = navigator.userAgent;
+    if (/Windows/i.test(ua)) return 'windows';
+    if (/Mac OS X|Macintosh/i.test(ua)) return 'macos';
+    if (/Linux/i.test(ua)) return 'linux';
+  }
+
+  return 'linux';
+}
+
 function parseTask(raw: Record<string, unknown>): Task {
   return {
     id: String(raw.id),
@@ -172,12 +187,19 @@ export class HttpClient {
     return parseTask(data);
   }
 
+  async showReminder(taskId: string, message?: string): Promise<void> {
+    await this.request<void>(`/tasks/${taskId}/remind`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
   async getAgentStatus(): Promise<AgentStatus> {
     const health = await this.getHealth();
     return {
       connected: true,
       version: health.version,
-      platform: (health.platform as AgentStatus['platform']) ?? 'linux',
+      platform: normalizePlatform(health.platform),
       taskCount: health.taskCount,
     };
   }

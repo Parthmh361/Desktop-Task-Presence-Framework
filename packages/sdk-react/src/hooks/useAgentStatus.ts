@@ -26,6 +26,8 @@ export function useAgentStatus(): AgentStatus | null {
 
     refresh();
 
+    const interval = setInterval(refresh, 30_000);
+
     const unsub = client.subscribeTaskEvents((event: TaskEvent) => {
       if (
         event.type === 'task:created' ||
@@ -37,7 +39,10 @@ export function useAgentStatus(): AgentStatus | null {
       }
     });
 
-    return unsub;
+    return () => {
+      clearInterval(interval);
+      unsub();
+    };
   }, [client, isConnected]);
 
   return isConnected ? status : null;

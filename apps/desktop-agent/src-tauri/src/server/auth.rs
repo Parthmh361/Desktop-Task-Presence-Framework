@@ -79,3 +79,27 @@ fn is_localhost(addr: &SocketAddr) -> bool {
         std::net::IpAddr::V6(v6) => v6.is_loopback(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::is_localhost;
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
+
+    #[test]
+    fn accepts_ipv4_and_ipv6_loopback() {
+        assert!(is_localhost(&SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 7842)));
+        assert!(is_localhost(&SocketAddr::new(
+            IpAddr::V6(Ipv6Addr::LOCALHOST),
+            7842
+        )));
+    }
+
+    #[test]
+    fn rejects_non_loopback_addresses() {
+        assert!(!is_localhost(&SocketAddr::new(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 1)), 7842)));
+        assert!(!is_localhost(&SocketAddr::new(
+            IpAddr::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1)),
+            7842
+        )));
+    }
+}

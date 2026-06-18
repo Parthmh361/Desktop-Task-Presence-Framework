@@ -22,7 +22,7 @@ jobs:
         run: pnpm install
 
       - name: Lint
-        run: pnpm lint || true
+        run: pnpm lint
 
       - name: Build packages
         run: pnpm build --filter=@dtpf/shared-types --filter=@dtpf/sdk-core --filter=@dtpf/sdk-react --filter=sticky-note-ui
@@ -30,10 +30,31 @@ jobs:
       - name: Build demo app
         run: pnpm --filter react-basic build
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build packages (test dependency)
+        run: pnpm build --filter=@dtpf/shared-types --filter=@dtpf/sdk-core
+
+      - name: Test
+        run: pnpm test
+
   build-agent:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -53,6 +74,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev pkg-config
+
+      - name: Verify WebView2 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $key = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          if (-not (Test-Path $key)) {
+            Write-Error 'WebView2 runtime not found on runner'
+          }
 
       - name: Install dependencies
         run: pnpm install

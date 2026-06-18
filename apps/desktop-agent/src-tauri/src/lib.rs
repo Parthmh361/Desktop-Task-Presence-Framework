@@ -1,5 +1,7 @@
 mod commands;
 mod db;
+mod paths;
+mod secrets;
 mod server;
 mod startup;
 mod state;
@@ -40,10 +42,11 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let handle = app.handle().clone();
             let db = init_database();
-            let secret = server::get_or_create_secret();
+            let secret = secrets::get_or_create_secret();
             let (event_tx, _) = broadcast::channel(256);
 
             let state = Arc::new(AppState {
@@ -67,10 +70,12 @@ pub fn run() {
             startup::setup_autostart();
 
             let restore_handle = handle.clone();
+            let state_for_tray = state.clone();
             tauri::async_runtime::spawn(async move {
                 if let Err(e) = window_manager::restore_all_windows(&db, &restore_handle).await {
                     tracing::warn!("Failed to restore windows: {}", e);
                 }
+                state_for_tray.schedule_tray_refresh();
             });
 
             tray::setup_tray(&handle).expect("Failed to setup system tray");

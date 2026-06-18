@@ -119,9 +119,10 @@ pub async fn save_window_position(
     y: i32,
     state: State<'_, Arc<AppState>>,
 ) -> Result<(), String> {
+    let monitor_id = window_manager::monitor_id_at_position(&state.app_handle, x, y);
     state
         .db
-        .update_position(&task_id, x, y)
+        .update_position(&task_id, x, y, monitor_id)
         .await
         .map_err(|e| e.to_string())?;
     Ok(())

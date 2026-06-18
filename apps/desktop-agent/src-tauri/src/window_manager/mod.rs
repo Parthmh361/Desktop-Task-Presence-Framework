@@ -64,9 +64,23 @@ pub async fn restore_all_windows(db: &Database, app: &AppHandle) -> Result<(), S
         let result = (|| {
             for (index, task) in tasks.iter().enumerate() {
                 let mut task = task.clone();
-                if task.position_x.is_none() || task.position_y.is_none() {
-                    task.position_x = Some(100 + (index as i64 * 20));
-                    task.position_y = Some(100 + (index as i64 * 20));
+                if !monitor_exists(&app_for_main, &task.monitor_id)
+                    || task.position_x.is_none()
+                    || task.position_y.is_none()
+                {
+                    if let Some(monitor) = app_for_main.primary_monitor().ok().flatten() {
+                        let pos = monitor.position();
+                        task.position_x = Some(pos.x as i64 + 100 + (index as i64 * 20));
+                        task.position_y = Some(pos.y as i64 + 100 + (index as i64 * 20));
+                    } else {
+                        task.position_x = Some(100 + (index as i64 * 20));
+                        task.position_y = Some(100 + (index as i64 * 20));
+                    }
+                    task.monitor_id = app_for_main
+                        .primary_monitor()
+                        .ok()
+                        .flatten()
+                        .and_then(|m| m.name().map(|n| n.to_string()));
                 }
                 create_sticky_window(&task, &app_for_main)?;
             }
@@ -89,6 +103,7 @@ pub fn update_sticky_content(task_id: &str, task: &TaskRow, app: &AppHandle) {
             "status": task.status,
             "priority": task.priority,
             "color": task.color,
+            "remindAt": task.remind_at.map(|t| chrono::DateTime::from_timestamp(t, 0)),
         });
         window.emit("task:updated", payload).ok();
         schedule_pin_sticky_window(&window);
@@ -110,6 +125,31 @@ pub fn hide_all_stickies(app: &AppHandle) {
             window.hide().ok();
         }
     }
+}
+
+pub fn focus_sticky_window(task_id: &str, app: &AppHandle) {
+    let label = window_label(task_id);
+    if let Some(window) = app.get_webview_window(&label) {
+        window.show().ok();
+        window.set_focus().ok();
+        schedule_pin_sticky_window(&window);
+    }
+}
+
+pub fn monitor_id_at_position(app: &AppHandle, x: i32, y: i32) -> Option<String> {
+    app.available_monitors().ok()?.into_iter().find_map(|m| {
+        let pos = m.position();
+        let size = m.size();
+        let in_bounds = x >= pos.x
+            && x <= pos.x + size.width as i32
+            && y >= pos.y
+            && y <= pos.y + size.height as i32;
+        if in_bounds {
+            m.name().map(|n| n.to_string())
+        } else {
+            None
+        }
+    })
 }
 
 fn window_label(task_id: &str) -> String {

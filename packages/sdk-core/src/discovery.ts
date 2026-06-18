@@ -3,7 +3,8 @@ import { DISCOVERY_TIMEOUT_MS, DTPFError, WELL_KNOWN_PORTS } from './types';
 const DISCOVERY_HOSTS = ['localhost', '127.0.0.1'] as const;
 
 export async function discoverAgent(timeout = DISCOVERY_TIMEOUT_MS): Promise<string> {
-  // Prefer the same hostname the web app uses (localhost vs 127.0.0.1 matters in browsers)
+  // Browser SDK probes well-known ports. The agent also writes agent.lock on disk
+  // (Node/scripts can read it; browsers cannot access the filesystem).
   const hosts =
     typeof window !== 'undefined' && window.location.hostname
       ? [

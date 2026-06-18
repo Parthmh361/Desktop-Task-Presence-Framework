@@ -34,6 +34,10 @@ pub fn register_startup() -> Result<(), String> {
     use winreg::RegKey;
 
     let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let exe_str = exe
+        .to_str()
+        .ok_or("Invalid exe path")?
+        .to_string();
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     let run = hkcu
         .open_subkey_with_flags(
@@ -41,13 +45,46 @@ pub fn register_startup() -> Result<(), String> {
             KEY_SET_VALUE,
         )
         .map_err(|e| e.to_string())?;
-    run.set_value("DTPF", &exe.to_str().ok_or("Invalid exe path")?)
+    run.set_value("DTPF", &exe_str)
         .map_err(|e| e.to_string())?;
     Ok(())
 }
 
-#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+#[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
 pub fn register_startup() -> Result<(), String> {
+    Ok(())
+}
+
+#[cfg(target_os = "macos")]
+pub fn register_startup() -> Result<(), String> {
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    let home = dirs::home_dir().ok_or_else(|| "No home directory".to_string())?;
+    let agents_dir = home.join("Library/LaunchAgents");
+    std::fs::create_dir_all(&agents_dir).map_err(|e| e.to_string())?;
+
+    let plist = format!(
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dtpf.agent</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>{}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+</dict>
+</plist>
+"#,
+        exe.display()
+    );
+
+    let plist_path = agents_dir.join("com.dtpf.agent.plist");
+    std::fs::write(&plist_path, plist).map_err(|e| e.to_string())?;
     Ok(())
 }
 

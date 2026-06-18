@@ -177,13 +177,15 @@ impl Database {
         id: &str,
         x: i32,
         y: i32,
+        monitor_id: Option<String>,
     ) -> Result<Option<TaskRow>, sqlx::Error> {
         let now = Utc::now().timestamp();
         sqlx::query_as::<_, TaskRow>(
-            "UPDATE tasks SET position_x = ?, position_y = ?, updated_at = ? WHERE id = ? RETURNING *",
+            "UPDATE tasks SET position_x = ?, position_y = ?, monitor_id = ?, updated_at = ? WHERE id = ? RETURNING *",
         )
         .bind(x as i64)
         .bind(y as i64)
+        .bind(monitor_id)
         .bind(now)
         .bind(id)
         .fetch_optional(self.pool())

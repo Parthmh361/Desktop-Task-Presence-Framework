@@ -72,6 +72,7 @@ pub fn router(state: Arc<AppState>) -> Router {
         )
         .route("/tasks/:id/complete", post(complete_task))
         .route("/tasks/:id/snooze", post(snooze_task))
+        .route("/tasks/:id/remind", post(remind_task))
         .route("/ws", get(crate::server::websocket::ws_handler))
         .with_state(state)
 }
@@ -111,6 +112,8 @@ async fn register(
             ApiError::Internal(e)
         }
     })?;
+
+    state.schedule_tray_refresh();
 
     Ok(Json(RegisterResponse {
         token: registration.token,
@@ -374,6 +377,61 @@ async fn complete_task(
     );
 
     Ok(Json(json))
+}
+
+#[derive(Deserialize)]
+pub struct RemindRequest {
+    pub message: Option<String>,
+}
+
+async fn remind_task(
+    State(state): State<Arc<AppState>>,
+    ConnectInfo(addr): ConnectInfo<std::net::SocketAddr>,
+    headers: HeaderMap,
+    Path(id): Path<String>,
+    Json(body): Json<RemindRequest>,
+) -> Result<StatusCode, ApiError> {
+    let auth = authenticate(&state, &addr, &headers).await?;
+    check_rate_limit(&state, &auth.app_id)?;
+
+    let task = state
+        .db
+        .get_task(&id)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?
+        .ok_or_else(|| ApiError::NotFound("Task not found".into()))?;
+
+    if task.source_app_id != auth.app_id {
+        return Err(ApiError::NotFound("Task not found".into()));
+    }
+
+    use tauri_plugin_notification::NotificationExt;
+    state
+        .app_handle
+        .notification()
+        .builder()
+        .title(&task.title)
+        .body(
+            body.message
+                .as_deref()
+                .or(task.body.as_deref())
+                .unwrap_or("Reminder"),
+        )
+        .show()
+        .map_err(|e| ApiError::Internal(e.to_string()))?;
+
+    let app = state.db.get_app_by_id(&auth.app_id).await.ok().flatten();
+    let json = task_row_to_json(&task, app.as_ref().map(|a| a.app_name.as_str()));
+
+    state.broadcast_app_event(
+        &auth.app_id,
+        serde_json::json!({
+            "type": "task:reminder",
+            "task": json,
+        }),
+    );
+
+    Ok(StatusCode::NO_CONTENT)
 }
 
 async fn snooze_task(

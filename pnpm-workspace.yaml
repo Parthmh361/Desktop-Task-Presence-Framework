@@ -3,3 +3,4 @@ packages:
   - "apps/desktop-agent/ui/*"
   - "packages/*"
   - "examples/*"
+  - "tests/*"

@@ -11,6 +11,7 @@ interface TaskData {
   priority: number;
   color?: string;
   sourceAppName?: string;
+  remindAt?: string | null;
 }
 
 function getTaskId(): string {
@@ -18,12 +19,65 @@ function getTaskId(): string {
   return params.get('taskId') ?? '';
 }
 
+function parseRemindAt(value: unknown): number | null {
+  if (value == null) return null;
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const ms = Date.parse(value);
+    return Number.isNaN(ms) ? null : ms;
+  }
+  return null;
+}
+
+function formatCountdown(msRemaining: number): string {
+  if (msRemaining <= 0) return 'Due now';
+  const totalSec = Math.floor(msRemaining / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 const PRIORITY_COLORS = ['#94a3b8', '#3b82f6', '#f59e0b', '#ef4444'];
+
+function useCountdown(remindAtMs: number | null): string | null {
+  const [label, setLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (remindAtMs == null) {
+      setLabel(null);
+      return;
+    }
+
+    const tick = () => {
+      setLabel(formatCountdown(remindAtMs - Date.now()));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [remindAtMs]);
+
+  return label;
+}
 
 export default function App() {
   const [task, setTask] = useState<TaskData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dark, setDark] = useState(false);
   const taskId = getTaskId();
+
+  const remindAtMs = task ? parseRemindAt(task.remindAt) : null;
+  const countdown = useCountdown(remindAtMs);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    setDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     if (!taskId) {
@@ -71,7 +125,7 @@ export default function App() {
 
   if (error) {
     return (
-      <div className="p-3 text-sm text-red-700 bg-white rounded-xl shadow-lg">
+      <div className="p-3 text-sm text-red-700 dark:text-red-300 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
         {error}
       </div>
     );
@@ -79,25 +133,33 @@ export default function App() {
 
   if (!task) {
     return (
-      <div className="p-3 text-sm text-gray-600 bg-yellow-100 rounded-xl shadow-lg animate-pulse">
+      <div className="p-3 text-sm text-gray-600 dark:text-gray-300 bg-yellow-100 dark:bg-yellow-900/40 rounded-xl shadow-lg animate-pulse">
         Loading...
       </div>
     );
   }
 
   const bg = task.color ?? '#FFE066';
+  const titleClass = dark ? 'text-gray-100' : 'text-gray-900';
+  const bodyClass = dark ? 'text-gray-200' : 'text-gray-800';
+  const metaClass = dark ? 'text-gray-300/90' : 'text-gray-700/80';
 
   return (
     <div
-      className="flex flex-col w-[280px] min-h-[200px] rounded-xl shadow-xl border border-black/10 overflow-hidden"
+      className="flex flex-col w-[280px] min-h-[200px] rounded-xl shadow-xl border border-black/10 dark:border-white/10 overflow-hidden"
       style={{ backgroundColor: bg }}
     >
       <div
-        className="h-6 cursor-grab active:cursor-grabbing bg-black/10 flex items-center justify-center"
+        className="h-6 cursor-grab active:cursor-grabbing bg-black/10 dark:bg-white/10 flex items-center justify-center gap-2"
         onMouseDown={onDragStart}
         onMouseUp={onDragEnd}
       >
-        <div className="w-10 h-1 rounded bg-black/20" />
+        <div className="w-10 h-1 rounded bg-black/20 dark:bg-white/30" />
+        {task.status === 'snoozed' && (
+          <span className="text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded bg-blue-600/80 text-white">
+            Snoozed
+          </span>
+        )}
       </div>
 
       <div className="flex-1 p-3 flex flex-col gap-2">
@@ -106,15 +168,21 @@ export default function App() {
             className="mt-1 w-2 h-2 rounded-full shrink-0"
             style={{ backgroundColor: PRIORITY_COLORS[task.priority] ?? PRIORITY_COLORS[0] }}
           />
-          <h1 className="font-bold text-sm text-gray-900 leading-tight flex-1">{task.title}</h1>
+          <h1 className={`font-bold text-sm leading-tight flex-1 ${titleClass}`}>{task.title}</h1>
         </div>
 
         {task.body && (
-          <p className="text-xs text-gray-800 whitespace-pre-wrap flex-1">{task.body}</p>
+          <p className={`text-xs whitespace-pre-wrap flex-1 ${bodyClass}`}>{task.body}</p>
+        )}
+
+        {countdown && (
+          <p className={`text-[10px] font-medium ${dark ? 'text-amber-200' : 'text-amber-900'}`}>
+            Reminder in {countdown}
+          </p>
         )}
 
         <div className="flex items-center justify-between mt-auto pt-2">
-          <span className="text-[10px] text-gray-700/80 truncate max-w-[120px]">
+          <span className={`text-[10px] truncate max-w-[120px] ${metaClass}`}>
             {task.sourceAppName ?? 'DTPF'}
           </span>
           <div className="flex gap-1">

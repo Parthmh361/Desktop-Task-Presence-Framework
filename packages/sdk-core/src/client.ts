@@ -141,8 +141,9 @@ export class DTPFClient {
     return this.http!.listTasks();
   }
 
-  async showReminder(_taskId: string, _message?: string): Promise<void> {
+  async showReminder(taskId: string, message?: string): Promise<void> {
     this.ensureConnected();
+    return this.http!.showReminder(taskId, message);
   }
 
   subscribeTaskEvents(handler: (event: TaskEvent) => void): Unsubscribe {

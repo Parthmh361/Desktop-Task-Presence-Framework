@@ -21,7 +21,7 @@ impl AppState {
         }
     }
 
-    pub fn broadcast_app_event(&self, source_app_id: &str, mut event: serde_json::Value) {
+    pub fn broadcast_app_event(self: &Arc<Self>, source_app_id: &str, mut event: serde_json::Value) {
         if let serde_json::Value::Object(ref mut map) = event {
             map.insert(
                 "sourceAppId".to_string(),
@@ -29,5 +29,13 @@ impl AppState {
             );
         }
         self.broadcast_event(event);
+        self.schedule_tray_refresh();
+    }
+
+    pub fn schedule_tray_refresh(self: &Arc<Self>) {
+        let state = Arc::clone(self);
+        tauri::async_runtime::spawn(async move {
+            crate::tray::refresh_tray(&state).await;
+        });
     }
 }

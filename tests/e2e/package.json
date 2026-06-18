@@ -1,0 +1,12 @@
+{
+  "name": "@dtpf/e2e",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2",
+    "typescript": "^5.7.2"
+  }
+}

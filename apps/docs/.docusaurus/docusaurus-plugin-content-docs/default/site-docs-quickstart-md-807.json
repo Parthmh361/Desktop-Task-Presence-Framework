@@ -1,0 +1,26 @@
+{
+  "id": "quickstart",
+  "title": "Quick Start",
+  "description": "Get a sticky note on your desktop from a web app in three steps.",
+  "source": "@site/docs/quickstart.md",
+  "sourceDirName": ".",
+  "slug": "/quickstart",
+  "permalink": "/quickstart",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2
+  },
+  "sidebar": "docsSidebar",
+  "previous": {
+    "title": "What is DTPF?",
+    "permalink": "/"
+  },
+  "next": {
+    "title": "Windows",
+    "permalink": "/platforms/windows"
+  }
+}

@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "DTPF Agent",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.dtpf.agent",
   "build": {
-    "beforeDevCommand": "cd ../../.. && pnpm --filter sticky-note-ui dev",
+    "beforeDevCommand": "pnpm --filter sticky-note-ui dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "cd ../../.. && pnpm --filter sticky-note-ui build",
+    "beforeBuildCommand": "pnpm --filter sticky-note-ui build",
     "frontendDist": "../ui/sticky-note/dist"
   },
   "app": {
@@ -44,6 +44,12 @@
   "plugins": {
     "shell": {
       "open": true
+    },
+    "updater": {
+      "active": true,
+      "endpoints": ["https://github.com/Parthmh361/Desktop-Task-Presence-Framework/releases/latest/download/latest.json"],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDgyOEJFQjJDQ0QzM0QwNTUKUldSVjBEUE5MT3VMZ25Fa1JPNWpSWldRZUdWYXJQZkN4YUkyaEZXYlBRQ0hTNWd1Qk9ZRmNBekoK"
     }
   }
 }

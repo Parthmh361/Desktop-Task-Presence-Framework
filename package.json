@@ -6,9 +6,19 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean"
+    "test:e2e": "pnpm --filter @dtpf/e2e test:e2e",
+    "clean": "turbo run clean",
+    "setup": "node scripts/setup.mjs",
+    "install-deps": "node scripts/install-deps.mjs",
+    "agent:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-dev.ps1",
+    "agent:dev:unix": "bash scripts/agent-dev.sh",
+    "demo:dev": "pnpm --filter react-basic dev",
+    "demo:vanilla": "pnpm --filter vanilla-js dev",
+    "demo:nextjs": "pnpm --filter nextjs-tasks dev",
+    "agent:kill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-kill.ps1"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },

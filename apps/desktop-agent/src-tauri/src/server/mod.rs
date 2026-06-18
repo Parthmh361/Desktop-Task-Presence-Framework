@@ -18,6 +18,7 @@ type HmacSha256 = Hmac<Sha256>;
 
 const AGENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const DEFAULT_PORT: u16 = 7842;
+const FALLBACK_PORTS: [u16; 3] = [7842, 7843, 7844];
 
 pub mod auth;
 pub mod routes;
@@ -30,12 +31,27 @@ pub async fn start_server(state: Arc<AppState>) -> Result<(), Box<dyn std::error
         .allow_headers(Any);
 
     let app = router(state.clone()).layer(cors);
-    let addr = SocketAddr::from(([127, 0, 0, 1], DEFAULT_PORT));
-    let listener = tokio::net::TcpListener::bind(addr).await?;
 
-    tracing::info!("DTPF agent listening on http://{}", addr);
+    let mut listener = None;
+    let mut bound_port = DEFAULT_PORT;
+    for port in FALLBACK_PORTS {
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+        match tokio::net::TcpListener::bind(addr).await {
+            Ok(l) => {
+                listener = Some(l);
+                bound_port = port;
+                tracing::info!("DTPF agent listening on http://{}", addr);
+                break;
+            }
+            Err(e) if port != FALLBACK_PORTS[FALLBACK_PORTS.len() - 1] => {
+                tracing::warn!("Port {} in use, trying next: {}", port, e);
+            }
+            Err(e) => return Err(e.into()),
+        }
+    }
 
-    write_lock_file(DEFAULT_PORT)?;
+    let listener = listener.expect("at least one port attempted");
+    write_lock_file(bound_port)?;
 
     axum::serve(
         listener,
@@ -47,41 +63,16 @@ pub async fn start_server(state: Arc<AppState>) -> Result<(), Box<dyn std::error
 }
 
 fn write_lock_file(port: u16) -> Result<(), std::io::Error> {
-    let dir = dirs::home_dir()
-        .unwrap_or_default()
-        .join(".dtpf");
+    let dir = crate::paths::data_dir();
     std::fs::create_dir_all(&dir)?;
-    std::fs::write(dir.join("agent.lock"), format!("http://127.0.0.1:{}", port))?;
+    std::fs::write(
+        crate::paths::agent_lock_path(),
+        format!("http://127.0.0.1:{}", port),
+    )?;
     Ok(())
 }
 
-pub fn get_or_create_secret() -> String {
-    let path = dirs::home_dir()
-        .unwrap_or_default()
-        .join(".dtpf")
-        .join("secret.key");
-
-    if path.exists() {
-        if let Ok(secret) = std::fs::read_to_string(&path) {
-            if !secret.trim().is_empty() {
-                return secret.trim().to_string();
-            }
-        }
-    }
-
-    let secret: String = (0..32)
-        .map(|_| format!("{:02x}", rand::random::<u8>()))
-        .collect();
-
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).ok();
-    }
-    std::fs::write(&path, &secret).ok();
-    secret
-}
-
-pub fn generate_token(app_id: &str, origin: &str, secret: &str) -> String {
-    let created_at = chrono::Utc::now().timestamp();
+pub fn generate_token(app_id: &str, origin: &str, secret: &str) -> String {    let created_at = chrono::Utc::now().timestamp();
     let payload = format!("{}:{}:{}", app_id, origin, created_at);
     let mut mac =
         HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC can take key of any size");
