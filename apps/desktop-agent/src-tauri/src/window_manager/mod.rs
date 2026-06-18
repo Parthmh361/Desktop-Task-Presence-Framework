@@ -16,16 +16,20 @@ pub fn create_sticky_window(task: &TaskRow, app: &AppHandle) -> Result<(), Strin
     let (x, y) = default_position(task, app);
 
     let url = format!("index.html?taskId={}", task.id);
-    let window = WebviewWindowBuilder::new(app, &label, WebviewUrl::App(url.into()))
+    let builder = WebviewWindowBuilder::new(app, &label, WebviewUrl::App(url.into()))
         .title("")
         .inner_size(280.0, 200.0)
         .decorations(false)
         .always_on_top(true)
         .skip_taskbar(true)
-        .transparent(true)
         .resizable(true)
         .visible(true)
-        .position(x, y)
+        .position(x, y);
+
+    #[cfg(not(target_os = "macos"))]
+    let builder = builder.transparent(true);
+
+    let window = builder
         .build()
         .map_err(|e| e.to_string())?;
 

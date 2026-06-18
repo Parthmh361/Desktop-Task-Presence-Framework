@@ -121,7 +121,7 @@ fn rebuild_tray_menu(
         app,
         "check_updates",
         "Check for Updates",
-        false,
+        true,
         None::<&str>,
     )?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
@@ -235,24 +235,40 @@ fn handle_menu_event(app: &AppHandle, event: tauri::menu::MenuEvent) {
                 match app.updater() {
                     Ok(updater) => match updater.check().await {
                         Ok(Some(update)) => {
-                            update.download_and_install().await?;
+                            let version = update.version.clone();
+                            if let Err(e) = update
+                                .download_and_install(|_chunk, _total| {}, || {})
+                                .await
+                            {
+                                app.dialog()
+                                    .message(format!("Update to {version} failed: {e}"))
+                                    .title("Check for Updates")
+                                    .kind(MessageDialogKind::Error)
+                                    .show(|_| {});
+                            }
                         }
-                        Ok(None) => { app.dialog()
-                .message("Auto-updates will be enabled after the first signed release.")
-                .title("Check for Updates")
-                .kind(MessageDialogKind::Info)
-                .show(|_| {}); }
-                        Err(e) => { app.dialog()
-                .message("Failed to check for updates: {}", e)
-                .title("Check for Updates")
-                .kind(MessageDialogKind::Error)
-                .show(|_| {}); }
+                        Ok(None) => {
+                            app.dialog()
+                                .message("You're running the latest version.")
+                                .title("Check for Updates")
+                                .kind(MessageDialogKind::Info)
+                                .show(|_| {});
+                        }
+                        Err(e) => {
+                            app.dialog()
+                                .message(format!("Failed to check for updates: {e}"))
+                                .title("Check for Updates")
+                                .kind(MessageDialogKind::Error)
+                                .show(|_| {});
+                        }
                     },
-                    Err(e) => { app.dialog()
-                .message("Updater not configured: {}", e)
-                .title("Check for Updates")
-                .kind(MessageDialogKind::Error)
-                .show(|_| {}); }
+                    Err(e) => {
+                        app.dialog()
+                            .message(format!("Updater not configured: {e}"))
+                            .title("Check for Updates")
+                            .kind(MessageDialogKind::Error)
+                            .show(|_| {});
+                    }
                 }
             });
         }
