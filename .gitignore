@@ -20,6 +20,7 @@ apps/desktop-agent/ui/sticky-note/dist/
 # IDE
 .idea/
 .vscode/
+.cursor/
 *.swp
 *.swo
 

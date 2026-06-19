@@ -80,6 +80,8 @@ Agent data is stored under `%LOCALAPPDATA%\dtpf\` on Windows and `~/.dtpf/` on L
 
 See [RELEASE.md](RELEASE.md) for GitHub secrets setup, tagging, and verification steps.
 
+For the full system design, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Reporting issues
 
 - **Bugs:** use the [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)

@@ -161,7 +161,11 @@ Set `RUST_LOG=debug` for verbose agent logs.
 
 ## Publishing
 
-npm packages (`@dtpf/shared-types`, `@dtpf/sdk-core`, `@dtpf/sdk-react`, `@dtpf/sdk-vanilla`) use [Changesets](https://github.com/changesets/changesets). Tag `v*.*.*` triggers `.github/workflows/release.yml` for signed agent binaries. See [RELEASE.md](RELEASE.md) for maintainer setup.
+npm packages (`@dtpf/shared-types`, `@dtpf/sdk-core`, `@dtpf/sdk-react`, `@dtpf/sdk-vanilla`) use [Changesets](https://github.com/changesets/changesets). Tag `v*.*.*` triggers `.github/workflows/release.yml` for signed agent binaries.
+
+- [RELEASE.md](RELEASE.md) — maintainer release setup
+- [PUBLISH_READINESS.md](PUBLISH_READINESS.md) — shipped status and hygiene checklist
+- [ARCHITECTURE.md](ARCHITECTURE.md) — full technical architecture spec
 
 Documentation: https://parthmh361.github.io/Desktop-Task-Presence-Framework/
 
