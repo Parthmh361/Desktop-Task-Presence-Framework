@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -38,18 +37,54 @@ jobs:
           --filter=@dtpf/sdk-vanilla
 
       - name: Publish to npm
-        run: >-
-          pnpm publish
-          --filter @dtpf/shared-types
-          --filter @dtpf/sdk-core
-          --filter @dtpf/sdk-react
-          --filter @dtpf/sdk-vanilla
-          --access public
-          --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::warning::NPM_TOKEN secret is not configured — skipping npm publish."
+            echo "Add an npm automation token in GitHub Settings → Secrets → Actions. See RELEASE.md."
+            exit 0
+          fi
+          pnpm publish \
+            --filter @dtpf/shared-types \
+            --filter @dtpf/sdk-core \
+            --filter @dtpf/sdk-react \
+            --filter @dtpf/sdk-vanilla \
+            --access public \
+            --no-git-checks
+
+  prepare-release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.release.outputs.id }}
+      is_draft: ${{ steps.release.outputs.draft }}
+    steps:
+      - name: Get or create GitHub release
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            RELEASE_ID=$(gh release view "$TAG" --json databaseId -q .databaseId)
+            IS_DRAFT=$(gh release view "$TAG" --json isDraft -q .isDraft)
+            echo "Using existing release $TAG (id=$RELEASE_ID, draft=$IS_DRAFT)"
+          else
+            gh release create "$TAG" \
+              --draft \
+              --title "DTPF Agent ${TAG#v}" \
+              --notes "Release artifacts uploading…"
+            RELEASE_ID=$(gh release view "$TAG" --json databaseId -q .databaseId)
+            IS_DRAFT=true
+            echo "Created draft release $TAG (id=$RELEASE_ID)"
+          fi
+          echo "id=$RELEASE_ID" >> "$GITHUB_OUTPUT"
+          echo "draft=$IS_DRAFT" >> "$GITHUB_OUTPUT"
 
   build-tauri:
+    needs: prepare-release
     permissions:
       contents: write
     strategy:
@@ -93,7 +128,9 @@ jobs:
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop-agent
+          releaseId: ${{ needs.prepare-release.outputs.release_id }}
           tagName: ${{ github.ref_name }}
+          releaseDraft: ${{ needs.prepare-release.outputs.is_draft == 'true' }}
           releaseName: 'DTPF Agent v__VERSION__'
           releaseBody: |
             ## Desktop agent
@@ -112,5 +149,17 @@ jobs:
             ```
 
             See the [documentation](https://parthmh361.github.io/Desktop-Task-Presence-Framework/) or the [docs source](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/tree/main/apps/docs) for quick start instructions.
-          releaseDraft: false
           prerelease: false
+
+  publish-release:
+    needs: [prepare-release, build-tauri]
+    if: needs.prepare-release.outputs.is_draft == 'true'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ github.ref_name }}" --draft=false

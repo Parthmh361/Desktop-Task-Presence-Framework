@@ -14,7 +14,7 @@ In **GitHub → Settings → Secrets and variables → Actions** on the reposito
 
 | Secret | Value |
 |--------|--------|
-| `NPM_TOKEN` | npm automation token with publish access to the `@dtpf` scope |
+| `NPM_TOKEN` | npm automation token with publish access to the `@dtpf` scope ([create token](https://www.npmjs.com/settings/~tokens)) |
 | `TAURI_PRIVATE_KEY` | Full contents of `~/.tauri/dtpf-agent.key` (from `pnpm tauri signer generate`) |
 | `TAURI_KEY_PASSWORD` | Password chosen when generating the signing key |
 
