@@ -30,6 +30,9 @@ jobs:
       - name: Build demo app
         run: pnpm --filter react-basic build
 
+      - name: Build docs site
+        run: pnpm --filter @dtpf/docs build
+
   test:
     runs-on: ubuntu-latest
     steps:

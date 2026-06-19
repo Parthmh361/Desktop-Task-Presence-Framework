@@ -31,9 +31,17 @@ Paste the printed public key into `tauri.conf.json` if it differs from the curre
 
 ## GitHub Pages (docs)
 
-Enable **Settings → Pages → Build and deployment → GitHub Actions** on the repository. Docs deploy automatically on push to `main` when `apps/docs/**` changes.
+The docs site must be deployed once before release links work. Do this **once** on the repository:
+
+1. Open **Settings → Pages → Build and deployment**
+2. Set **Source** to **GitHub Actions** (not “Deploy from a branch”)
+3. Go to **Actions → Deploy Docs → Run workflow** (or push any commit to `main`)
+
+The workflow [`.github/workflows/docs.yml`](.github/workflows/docs.yml) builds Docusaurus from `apps/docs/` and publishes on every push to `main`.
 
 Live URL: https://parthmh361.github.io/Desktop-Task-Presence-Framework/
+
+If you see a GitHub Pages 404, Pages is not enabled or the Deploy Docs workflow has not completed successfully yet. Use the [docs source](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/tree/main/apps/docs/docs) as a fallback.
 
 ## Pre-release checklist
 
