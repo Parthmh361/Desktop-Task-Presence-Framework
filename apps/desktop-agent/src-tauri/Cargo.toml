@@ -1,6 +1,6 @@
 [package]
 name = "dtpf-agent"
-version = "1.0.0"
+version = "1.0.1"
 description = "DTPF Desktop Agent"
 authors = ["DTPF"]
 edition = "2021"

@@ -87,4 +87,20 @@ Locally built `.app` bundles may be quarantined. Right-click → Open, or remove
 xattr -cr /path/to/DTPF\ Agent.app
 ```
 
-For production distribution, use signed releases from GitHub.
+For production distribution, use signed releases from [GitHub Releases](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/releases).
+
+## macOS: sticky notes are opaque
+
+Sticky windows on macOS render without transparency (opaque background). Linux and Windows support transparent sticky backgrounds. Full macOS transparency requires `macos-private-api` and is planned for a future release.
+
+## Preferences UI not yet available
+
+The tray **Preferences** menu item shows a placeholder dialog. Agent settings (auto-start, data directory) are not configurable from the UI yet — planned for v1.1.
+
+## Auto-updater fails / "Failed to check for updates"
+
+The updater fetches `latest.json` from GitHub Releases. This file only exists after a successful tagged release with signed Tauri builds. Install the latest release manually first; subsequent updates work automatically once `latest.json` is published.
+
+## End-to-end tests in CI
+
+Playwright e2e tests (`pnpm test:e2e`) require a running agent and are not wired into CI yet. Run them locally after starting `pnpm agent:dev`.

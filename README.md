@@ -42,7 +42,7 @@ export default function App() {
 
 ### 3. Run the desktop agent
 
-Download a release binary (see [Releases](https://github.com/dtpf/dtpf/releases)) or build from source:
+Download a release binary (see [Releases](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/releases)) or build from source:
 
 ```bash
 pnpm install-deps
@@ -161,7 +161,9 @@ Set `RUST_LOG=debug` for verbose agent logs.
 
 ## Publishing
 
-npm packages (`@dtpf/shared-types`, `@dtpf/sdk-core`, `@dtpf/sdk-react`, `@dtpf/sdk-vanilla`) use [Changesets](https://github.com/changesets/changesets). Tag `v*.*.*` triggers `.github/workflows/release.yml` for signed agent binaries.
+npm packages (`@dtpf/shared-types`, `@dtpf/sdk-core`, `@dtpf/sdk-react`, `@dtpf/sdk-vanilla`) use [Changesets](https://github.com/changesets/changesets). Tag `v*.*.*` triggers `.github/workflows/release.yml` for signed agent binaries. See [RELEASE.md](RELEASE.md) for maintainer setup.
+
+Documentation: https://parthmh361.github.io/Desktop-Task-Presence-Framework/
 
 ## Security
 

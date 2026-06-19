@@ -15,7 +15,8 @@
     "demo:dev": "pnpm --filter react-basic dev",
     "demo:vanilla": "pnpm --filter vanilla-js dev",
     "demo:nextjs": "pnpm --filter nextjs-tasks dev",
-    "agent:kill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-kill.ps1"
+    "agent:kill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-kill.ps1",
+    "release:check": "pnpm lint && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",

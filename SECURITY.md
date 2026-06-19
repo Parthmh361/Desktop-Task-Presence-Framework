@@ -8,7 +8,7 @@ Security fixes are applied to the latest release on the `main` branch. Older rel
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Report security issues privately by opening a [GitHub Security Advisory](https://github.com/dtpf/desktop-task-presence-framework/security/advisories/new) or contacting the maintainers through the contact information in the repository. Include:
+Report security issues privately by opening a [GitHub Security Advisory](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/security/advisories/new) or contacting the maintainers through the contact information in the repository. Include:
 
 - A description of the vulnerability and its impact
 - Steps to reproduce

@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +35,7 @@ jobs:
           --filter=@dtpf/shared-types
           --filter=@dtpf/sdk-core
           --filter=@dtpf/sdk-react
+          --filter=@dtpf/sdk-vanilla
 
       - name: Publish to npm
         run: >-
@@ -41,10 +43,10 @@ jobs:
           --filter @dtpf/shared-types
           --filter @dtpf/sdk-core
           --filter @dtpf/sdk-react
+          --filter @dtpf/sdk-vanilla
           --access public
           --no-git-checks
         env:
-          # Requires repository secret: NPM_TOKEN
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   build-tauri:
@@ -76,7 +78,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev pkg-config
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libglib2.0-dev libsecret-1-dev pkg-config
 
       - name: Install dependencies
         run: pnpm install
@@ -87,7 +89,6 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optional code-signing secrets (unsigned builds work without these):
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
@@ -104,11 +105,12 @@ jobs:
             - [@dtpf/shared-types](https://www.npmjs.com/package/@dtpf/shared-types)
             - [@dtpf/sdk-core](https://www.npmjs.com/package/@dtpf/sdk-core)
             - [@dtpf/sdk-react](https://www.npmjs.com/package/@dtpf/sdk-react)
+            - [@dtpf/sdk-vanilla](https://www.npmjs.com/package/@dtpf/sdk-vanilla)
 
             ```bash
             npm install @dtpf/sdk-react
             ```
 
-            See the [documentation](https://github.com/dtpf/desktop-task-presence-framework/tree/main/apps/docs) for quick start instructions.
+            See the [documentation](https://parthmh361.github.io/Desktop-Task-Presence-Framework/) or the [docs source](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/tree/main/apps/docs) for quick start instructions.
           releaseDraft: false
           prerelease: false

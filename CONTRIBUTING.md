@@ -74,7 +74,11 @@ Agent data is stored under `%LOCALAPPDATA%\dtpf\` on Windows and `~/.dtpf/` on L
    - `cargo test` in `apps/desktop-agent/src-tauri` for Rust changes
 4. **Follow existing conventions** — match naming, formatting, and patterns in the files you touch.
 5. **Do not commit secrets** — no API keys, tokens, or local agent data from `%LOCALAPPDATA%\dtpf\` or `~/.dtpf/`.
-6. **CI must pass** — PRs run lint/build jobs and agent build checks on Ubuntu and Windows (see `.github/workflows/ci.yml`).
+6. **CI must pass** — PRs run lint/build jobs and agent build checks on Ubuntu, Windows, and macOS (see `.github/workflows/ci.yml`).
+
+## Releasing
+
+See [RELEASE.md](RELEASE.md) for GitHub secrets setup, tagging, and verification steps.
 
 ## Reporting issues
 

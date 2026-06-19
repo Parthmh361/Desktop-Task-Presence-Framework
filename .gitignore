@@ -35,6 +35,11 @@ pnpm-debug.log*
 # Test
 coverage/
 
+# Docusaurus / Next.js cache
+apps/docs/.docusaurus/
+apps/docs/build/
+examples/**/.next/
+
 # Rust
 **/*.rs.bk
 

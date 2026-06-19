@@ -2,11 +2,12 @@
 const config = {
   title: 'DTPF',
   tagline: 'Desktop Task Presence Framework',
-  url: 'https://dtpf.dev',
-  baseUrl: '/',
+  url: 'https://parthmh361.github.io',
+  baseUrl: '/Desktop-Task-Presence-Framework/',
   onBrokenLinks: 'throw',
-  organizationName: 'dtpf',
-  projectName: 'desktop-task-presence-framework',
+  organizationName: 'Parthmh361',
+  projectName: 'Desktop-Task-Presence-Framework',
+  trailingSlash: false,
 
   presets: [
     [
@@ -35,7 +36,7 @@ const config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/dtpf/desktop-task-presence-framework',
+          href: 'https://github.com/Parthmh361/Desktop-Task-Presence-Framework',
           label: 'GitHub',
           position: 'right',
         },

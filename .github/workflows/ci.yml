@@ -25,7 +25,7 @@ jobs:
         run: pnpm lint
 
       - name: Build packages
-        run: pnpm build --filter=@dtpf/shared-types --filter=@dtpf/sdk-core --filter=@dtpf/sdk-react --filter=sticky-note-ui
+        run: pnpm build --filter=@dtpf/shared-types --filter=@dtpf/sdk-core --filter=@dtpf/sdk-react --filter=@dtpf/sdk-vanilla --filter=sticky-note-ui
 
       - name: Build demo app
         run: pnpm --filter react-basic build

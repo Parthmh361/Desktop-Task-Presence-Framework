@@ -8,11 +8,11 @@ Get a sticky note on your desktop from a web app in three steps.
 
 ## 1. Install the desktop agent
 
-Download the DTPF Agent for your platform from [GitHub Releases](https://github.com/dtpf/desktop-task-presence-framework/releases), or build from source:
+Download the DTPF Agent for your platform from [GitHub Releases](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/releases), or build from source:
 
 ```bash
-git clone https://github.com/dtpf/desktop-task-presence-framework.git
-cd desktop-task-presence-framework
+git clone https://github.com/Parthmh361/Desktop-Task-Presence-Framework.git
+cd Desktop-Task-Presence-Framework
 pnpm install-deps   # Node packages + Rust toolchain
 pnpm agent:dev      # Windows
 # pnpm agent:dev:unix  # Linux / macOS
@@ -87,5 +87,5 @@ function StatusBar() {
 
 ## Next steps
 
-- Full demo: [`examples/react-basic`](https://github.com/dtpf/desktop-task-presence-framework/tree/main/examples/react-basic)
+- Full demo: [`examples/react-basic`](https://github.com/Parthmh361/Desktop-Task-Presence-Framework/tree/main/examples/react-basic)
 - Troubleshooting: [common issues](./troubleshooting)

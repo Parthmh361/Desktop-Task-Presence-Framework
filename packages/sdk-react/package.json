@@ -1,6 +1,6 @@
 {
   "name": "@dtpf/sdk-react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React hooks and context for DTPF",
   "publishConfig": {
     "access": "public"
@@ -15,7 +15,10 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --external react",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external react",
